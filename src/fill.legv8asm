@@ -1,0 +1,43 @@
+main:
+SUBI SP, SP, #40
+ADD X0, SP, XZR
+ADDI X1, XZR, #5
+BL fill
+ADDI SP, SP, #40
+DUMP
+B end
+
+
+fill:
+//Fill: Fill(addr, length) will create an array at address addr of length elements containing 
+//length unique integers in reverse sorted order.
+
+
+//X0 has the address
+//X1 has the length
+
+
+SUBI SP, SP, #8
+STUR LR, [SP, #0]
+
+ADD X10, X0, XZR    //X10 will store address
+ADD X11, X1, XZR    //X11 will store the length of the array and then decrement and add those nums into the array.
+
+//keep looping till the number goes to 0
+
+fill_loop:
+PRNT X11
+ADD X12, X11, XZR
+CBZ X12, end_fill    //go to endFill if X10 has a 0 in it
+STUR X11, [X10, #0]
+SUBI X11, X11, #1
+ADDI X10, X10, #8
+B fill_loop
+
+
+end_fill:
+LDUR LR, [SP, #0]
+ADDI SP, SP, #8
+BR LR
+
+end:

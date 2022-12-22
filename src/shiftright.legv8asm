@@ -1,0 +1,43 @@
+shift_right:
+
+//Shift right: This procedure takes three parameters, the address of an array of ints, 
+//the index of the final element in the array, and a position in the array.  
+//It overwrites the final element, shifting intermediate elements to the right, leaving a whole at the position.
+
+//ShiftRight(addr, pos, final):
+//  for i from final-1 to pos:
+//    addr[i + 1] = addr[i]
+
+//X0 stores the address of an array of integers
+//X1 stores the position at which we need to insert the given element
+//X2 stores the index of the final element of the array
+
+
+
+    SUBI SP, SP, #8
+    STUR LR, [SP, #0]
+
+    ADD X10, X1, XZR    //X10 is the pos
+    SUBI X2, X2, #1     //X2 stores the index of the final element-1.
+
+
+shift_right_loop:
+
+    SUBS X9, X10, X2       //comparing the pos with the current index
+    B.LE continue_shift_loop    //if its less than or equal to that then go to continue_shift_loop
+    B end_shift_loop            //or else end_shift_loop
+
+continue_shift_loop:
+
+    LSL X11, X2, #3              //X11 = i * 8          
+
+
+end_shift_loop:
+
+    LDUR LR, [SP, #0]
+    ADDI SP, SP, #8
+    BR LR
+
+
+
+ 

@@ -1,0 +1,331 @@
+main:
+SUBI SP, SP, #48
+ADD X0, SP, XZR
+ADDI X1, XZR, #6
+BL fill
+
+//ADD X0, SP, XZR
+//ADD X19, SP, XZR
+
+//ADDI X9, XZR, #9
+//STUR X9, [X0, #0]
+
+//ADDI X9, XZR, #1
+//STUR X9, [X0, #8]
+
+//ADDI X9, XZR, #3
+//STUR X9, [X0, #16]
+
+//ADDI X9, XZR, #5
+//STUR X9, [X0, #24]
+
+//ADDI X9, XZR, #2
+//STUR X9, [X0, #32]
+
+//ADDI X9, XZR, #2
+//STUR X9, [X0, #32]
+
+
+ADDI X1, XZR, #6
+
+BL insertion_sort
+
+ADDI SP, SP, #48
+DUMP
+
+B end_main_2
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+fill:
+//Fill: Fill(addr, length) will create an array at address addr of length elements containing 
+//length unique integers in reverse sorted order.
+
+
+//X0 has the address
+//X1 has the length
+
+
+SUBI SP, SP, #8
+STUR LR, [SP, #0]
+
+ADD X10, X0, XZR    //X10 will store address
+ADD X11, X1, XZR    //X11 will store the length of the array and then decrement and add those nums into the array.
+
+//keep looping till the number goes to 0
+
+fill_loop:
+ADD X12, X11, XZR
+CBZ X12, end_fill    //go to endFill if X10 has a 0 in it
+STUR X11, [X10, #0]
+SUBI X11, X11, #1
+ADDI X10, X10, #8
+B fill_loop
+
+
+end_fill:
+LDUR LR, [SP, #0]
+ADDI SP, SP, #8
+BR LR
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+//Insert sorted position: This procedure takes three parameters, the address of a partially-sorted array of ints, 
+//the index of the first item in the array that is not in sorted position, and the index of the last element of the array. 
+//It moves the first unsorted element into its sorted position, shifting elements to the right as necessary such that the 
+//entire element is in sorted order and no data is lost.
+//InsertSortedPos(addr, pos, final):
+//  v = addr[pos]
+//  p = FindSortedPos(addr, v, final)
+//  ShiftRight(addr, p, final)
+//  addr(p) = v
+
+
+//X0 stores the address of the array
+//X1 stores the position of the first element that isnt sorted
+//X2 stores the index of the final element
+
+
+insert_sorted_position:
+
+//Insert sorted position: This procedure takes three parameters, the address of a partially-sorted array of ints, 
+//the index of the first item in the array that is not in sorted position, and the index of the last element of the array. 
+//It moves the first unsorted element into its sorted position, shifting elements to the right as necessary such that the 
+//entire element is in sorted order and no data is lost.
+//InsertSortedPos(addr, pos, final):
+//  v = addr[pos]
+//  p = FindSortedPos(addr, v, final)
+//  ShiftRight(addr, p, final)
+//  addr(p) = v
+
+
+//X0 stores the address of the array
+//X1 stores the position of the first element that isnt sorted
+//X2 stores the index of the final element
+
+
+SUBI SP, SP, #8
+STUR LR, [SP, #0]
+
+
+ADD X12, X0, XZR    //store the base address of the array in X12
+ADD X13, X1, XZR    //store the position argument into X13
+ADD X14, X2, XZR
+
+LSL X1, X1, #3  //pos * 8
+ADD X11, X0, X1  // &addr[pos]
+LDUR X10, [X11, #0]  //X10 = add[pos]
+
+SUBI SP, SP, #40
+STUR X10, [SP, #0]
+STUR X11, [SP, #8]
+STUR X12, [SP, #16]
+STUR X13, [SP, #24]
+STUR X14, [SP, #32]
+
+ADD X0, X12, XZR
+ADD X1, X10, XZR
+ADD X2, X14, XZR
+
+BL find_sorted_position     //returns the sorted position into X7.
+
+PRNT X7
+
+LDUR X10, [SP, #0]
+LDUR X11, [SP, #8]
+LDUR X12, [SP, #16]
+LDUR X13, [SP, #24]
+LDUR X14, [SP, #32]
+
+ADD X0, X12, XZR    //bring back the original base address
+ADD X1, X7, XZR     //X1 = pos
+
+
+ADD X2, X13, XZR   //X2 stores index of final element
+BL shift_right      //call shift right
+
+LDUR X10, [SP, #0]
+LDUR X11, [SP, #8]
+LDUR X12, [SP, #16]
+LDUR X13, [SP, #24]
+LDUR X14, [SP, #32]
+
+
+ADD X0, X12, XZR
+PRNT X7
+
+LSL X7, X7, #3
+ADD X0, X0, X7
+STUR X10, [X0, #0]  //addr[pos] = v
+
+
+end_insert_sorted_position:
+  ADDI SP, SP, #40
+  LDUR LR, [SP, #0]
+  ADDI SP, SP, #8
+  
+  BR LR
+
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+shift_right:
+
+//Shift right: This procedure takes three parameters, the address of an array of ints, 
+//the index of the final element in the array, and a position in the array.  
+//It overwrites the final element, shifting intermediate elements to the right, leaving a whole at the position.
+
+//ShiftRight(addr, pos, final):
+//  for i from final-1 to pos:
+//    addr[i + 1] = addr[i]
+
+//X0 stores the address of an array of integers
+//X1 stores the position at which we need to insert the given element
+//X2 stores the index of the final element of the array
+
+
+
+    SUBI SP, SP, #8
+    STUR LR, [SP, #0]
+
+    ADD X10, X1, XZR    //X10 is the pos
+    SUBI X2, X2, #1     //X2 stores the index of the final element-1.
+
+
+shift_right_loop:
+
+    SUBS X9, X10, X2       //comparing the pos with the current index
+    B.LE continue_shift_loop    //if its less than or equal to that then go to continue_shift_loop
+    B end_shift_loop            //or else end_shift_loop
+
+continue_shift_loop:
+
+    LSL X11, X2, #3              //X11 = i * 8          
+    ADD X15, X11, X0             //X15 = &arr[current_index]
+    LDUR X13, [X15, #0]          //load first array element in X13
+    STUR X13, [X15, #8]          //addr[i+1] = addr[i]
+    SUBI X2, X2, #1             //decrementing current index
+    B shift_right_loop      //branch back to shift_right_loop 
+
+end_shift_loop:
+
+    LDUR LR, [SP, #0]
+    ADDI SP, SP, #8
+    BR LR
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+find_sorted_position:
+//Find sorted position: This procedure takes three parameters, the address of an array of sorted ints, 
+//a value, and the index of the last element in the array.  
+//It searches the array for the sorted position of the value and returns that index.
+
+//FindSortedPos(addr, val, final):
+//  for i from 0 to final
+//    if addr[i] <= val
+//      break
+//        return i
+
+//X0 stores the address of an array of sorted ints
+//X1 stores a value
+//X2 stores the index of the last element in the array
+
+
+
+SUBI SP, SP, #8
+STUR LR, [SP, #0]
+ADD X9, X0, XZR
+ADD X10, XZR, XZR   //to keep track of index, i = 0
+
+find_sorted_position_loop:
+
+
+
+SUBS X14, X10, X2     //compare index with the index of final
+B.LE continue_find_sorted_loop      //if its less then continue the loop
+B end_find_sorted_loop
+
+continue_find_sorted_loop:
+LDUR X11, [X0, #0]      //load addr[i] into X11
+SUBS X15, X11, X1             //compare addr[i]>=val
+B.GE end_find_sorted_loop           //if true end the loop
+ADDI X0, X0, #8         //or else increment i and check again
+ADDI X10, X10, #1
+B find_sorted_position_loop
+
+end_find_sorted_loop:
+ADD X7, X10, XZR
+LDUR LR, [SP, #0]
+ADDI SP, SP, #8
+BR LR
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+insertion_sort:
+//InsertionSort(addr, length):
+//for i from 1 to length - 1:
+//InsertSortedPos(addr, i, length-1)
+
+SUBI SP, SP, #8
+STUR LR, [SP, #0]
+
+SUBI X9, X1, #1
+ADDI X10, XZR, #1
+ADD X11, X1, XZR
+ADD X12, X0, XZR     
+
+
+SUBI SP, SP, #32
+
+
+
+insertion_sort_loop:
+
+STUR X9, [SP, #0]
+STUR X10, [SP, #8]
+STUR X11, [SP, #16]
+STUR X12, [SP, #24]
+
+PRNT X9
+PRNT X10
+SUBS X15, X10, X9
+
+
+
+B.LE stay_in_loop
+B end_insertion_sort_loop
+
+stay_in_loop:
+ADD X0, X12, XZR
+ADD X1, X10, XZR
+ADD X2, X9, XZR
+BL insert_sorted_position
+
+LDUR X9, [SP, #0]
+LDUR X10, [SP, #8]
+LDUR X11, [SP, #16]
+LDUR X12, [SP, #24]
+
+ADDI X10, X10, #1
+
+B insertion_sort_loop
+
+
+end_insertion_sort_loop:
+ADDI SP, SP, #32
+LDUR LR, [SP, #0]
+ADDI SP, SP, #8
+BR LR
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+end_main_2:

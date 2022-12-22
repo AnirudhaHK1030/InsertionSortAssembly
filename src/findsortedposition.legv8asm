@@ -1,0 +1,118 @@
+main:
+
+SUBI SP, SP, #40
+ADD X0, SP, XZR
+ADD X19, SP, XZR
+ADDI X9, XZR, #3
+STUR X9, [X0, #0]
+
+ADDI X9, XZR, #5
+STUR X9, [X0, #8]
+
+ADDI X9, XZR, #1
+STUR X9, [X0, #16]
+
+ADDI X9, XZR, #4
+STUR X9, [X0, #24]
+
+ADDI X9, XZR, #6
+STUR X9, [X0, #32]
+
+ADDI X1, XZR, #6
+ADDI X2, XZR, #5
+
+BL find_sorted_position
+
+
+
+ADDI SP, SP, #40
+DUMP
+
+B end_main_2
+
+
+
+find_sorted_position:
+//Find sorted position: This procedure takes three parameters, the address of an array of sorted ints, 
+//a value, and the index of the last element in the array.  
+//It searches the array for the sorted position of the value and returns that index.
+
+//FindSortedPos(addr, val, final):
+//  for i from 0 to final
+//    if addr[i] <= val
+//      break
+//        return i
+
+//X0 stores the address of an array of sorted ints
+//X1 stores a value
+//X2 stores the index of the last element in the array
+
+
+
+SUBI SP, SP, #8
+STUR LR, [SP, #0]
+ADD X9, X0, XZR
+ADD X10, XZR, XZR   //to keep track of index, i = 0
+
+
+find_sorted_position_loop:
+
+SUBS X14, X10, X2     //compare index with the index of final
+B.LE continue_find_sorted_loop      //if its less then continue the loop
+B end_find_sorted_loop
+
+continue_find_sorted_loop:
+LDUR X11, [X0, #0]      //load addr[i] into X11
+SUBS X15, X11, X1             //compare addr[i]>=val
+B.GE end_find_sorted_loop           //if true end the loop
+ADDI X0, X0, #8         //or else increment i and check again
+ADDI X10, X10, #1
+B find_sorted_position_loop
+
+end_find_sorted_loop:
+ADD X7, X10, XZR
+LDUR LR, [SP, #0]
+ADDI SP, SP, #8
+BR LR
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+end_main_2:
